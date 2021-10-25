@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<head>
+<html>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
+  integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
+  integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A=="
+  crossorigin=""/>
+
+  <link rel="stylesheet" href="styles.css">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,300;0,400;0,500;0,700;0,900;1,500&display=swap" rel="stylesheet">
+
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons"
+      rel="stylesheet">
+
+</head>
+
+<body>
+  <div class = "container-fluid">
+
+  <button  id = "location-btn" onclick = "zoom_to_loc()"><i class = 'material-icons'>near_me</i></button>
+  <div id = "main-section" class = "row">
+    <div id = "control-panel" class = "col-md-4">
+      <div class = "row">
+      <i id = 'main-icon' class = 'material-icons col-xs-3'>sports_bar</i><h2 class = "col-xs-9">Breweries Near You</h2>
+      </div>
+      <p>Results sorted by distance from your current location</p>
+      <form><div class = "form-group row">
+        <input id = "search-bar" onkeyup="search_brewery()" class = "form-control" type = "text" placeholder = "Search for a Brewery...">
+      </div></form>
+      <form></form>
+      <div id = 'brew-table'></div>
+    </div>
+    <div id = "map" class = "col-md-8"></div>
+  </div>
+
+</div>
+
+<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
+integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
+crossorigin=""></script>
+
+<!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+
+<script type = "text/javascript">
+  var mymap = L.map('map').setView([47.6062, -122.3321], 12)
+
+  L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}', {
+    attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+    maxZoom: 18,
+    id: 'mapbox/light-v10',
+    tileSize: 512,
+    zoomOffset: -1,
+    accessToken: 'pk.eyJ1IjoiY3NkaWVobCIsImEiOiJja3V5cTBhdjM1bjRlMm90NDRtM3Zpem13In0.9IYdV4YzHuL-eF8OtpdtUw'
+}).addTo(mymap);
+
+</script>
+
+
+
+
+<script type = "text/javascript">
+
+let beerIcon = L.divIcon({
+        className: 'custom-div-icon',
+        html: "<div style='background-color: #6593A6;' class='marker-pin'></div><i class='material-icons'>sports_bar</i>",
+        iconSize: [34, 42],
+        iconAnchor: [17, 42] // half of width + height
+    });
+
+let locIcon = L.divIcon({
+        className: 'custom-div-icon',
+        html: "<div style='background-color: #F2C063;' class='marker-pin'></div><i class='material-icons'>near_me</i>",
+        iconSize: [30, 42],
+        iconAnchor: [15, 42] // half of width + height
+    });
+
+let lat = ""
+let lon = ""
+
+if (navigator.geolocation){
+  navigator.geolocation.getCurrentPosition(function(position) {
+    lat += position.coords.latitude;
+    lon += position.coords.longitude;
+
+    mymap.setView([lat, lon], 14)
+    L.marker([lat, lon], {icon: locIcon}).addTo(mymap)
+
+  fetch('https://api.openbrewerydb.org/breweries?per_page=50&by_city=seattle&by_dist'+lat+','+lon)
+  .then(res => res.json())
+  .then(
+    (responseData) => {
+
+      console.log(responseData)
+
+      layerGroup = L.featureGroup().addTo(mymap);
+
+      let html = "";
+
+      responseData.forEach(({latitude, longitude, name, street, brewery_type, website_url}) => {
+
+        if(latitude != null && longitude != null) {
+        layerGroup.addLayer(
+        L.marker([latitude, longitude], {icon: beerIcon}).bindPopup(
+          `<p><strong>Name:</strong> ${name}</br>, <strong>Address:</strong> ${street} | <a target = '_blank' href = '${website_url}'>Website</a></p>`
+        ))}
+
+      html += "<div class = 'brewery' onclick = 'find_brewery()'><strong>" + name + "</strong> " + brewery_type + "<br><em>" + street + "</em> | " +
+      "<a target = '_blank' href=" + website_url + ">Website</a><br><br></div>"
+
+      })
+
+      document.getElementById('brew-table').innerHTML = html
+
+})
+});
+}
+
+function search_brewery() {
+  let input = document.getElementById('search-bar').value
+  input = input.toLowerCase()
+  let list = document.getElementsByClassName('brewery');
+
+  for(let i = 0; i < list.length; i++) {
+    if (!list[i].innerHTML.toLowerCase().includes(input)) {
+      list[i].style.display = "none"
+    } else {
+      list[i].style.display="list-item"
+    }
+  }
+}
+
+function zoom_to_loc() {
+  mymap.setView([lat, lon], 15)
+}
+
+</script>
+
+
+
+</body>
+</html>

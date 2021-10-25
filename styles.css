@@ -1,0 +1,113 @@
+
+body {
+  font-family: 'Roboto', sans-serif;
+}
+
+h2 {
+  font-weight: 900;
+  color: #6593A6;
+}
+
+#main-section {
+  height: 100vh;
+
+}
+
+#map {
+  height: 100vh;
+  z-index: 1;
+}
+
+#location-btn {
+  background-color: darkorange;
+  color: white;
+  border-color: none;
+  border-radius: 50%;
+  position: fixed;
+  z-index: 5;
+  width: 50px;
+  height: 50px;
+  bottom: 30px;
+  right: 30px;
+  box-shadow: 5px 5px 5px #8a8a8a;
+}
+
+#control-panel {
+  background-color: #F2F2F2;
+  height: 100vh;
+  box-shadow: 5px 0px 5px #8a8a8a;
+  z-index: 3;
+
+}
+
+#main-icon {
+  color: #6593A6;
+  font-size: 48px;
+}
+
+#brew-table {
+  position:relative;
+  height: 80%;
+  width: 80%;
+  overflow: scroll;
+  padding: 10px;
+  margin: auto;
+}
+
+.brewery {
+  display: list-item;
+}
+
+.brewery:hover {
+  color: steelblue;
+  transition: color .15s ease-in;
+}
+
+#search-bar {
+  width: 60%;
+  padding: 10px;
+  margin: auto;
+}
+
+#search-bar:hover {
+  width: 90%;
+  transition: width .5s ease-in;
+}
+
+
+a {
+  color: #6593A6;
+}
+
+
+.marker-pin {
+  width: 30px;
+  height: 30px;
+  border-radius: 50% 50% 50% 0;
+  background: #c30b82;
+  position: absolute;
+  transform: rotate(-45deg);
+  left: 50%;
+  top: 50%;
+  margin: -15px 0 0 -15px;
+}
+
+.marker-pin::after {
+    content: '';
+    width: 24px;
+    height: 24px;
+    margin: 3px 0 0 3px;
+    background: #fff;
+    position: absolute;
+    border-radius: 50%;
+ }
+
+.custom-div-icon i {
+   position: absolute;
+   width: 22px;
+   font-size: 22px;
+   left: 0;
+   right: 0;
+   margin: 10px auto;
+   text-align: center;
+}
